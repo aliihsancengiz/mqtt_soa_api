@@ -1,0 +1,40 @@
+name: Mqtt IPC Project Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Dependecies
+      run: |
+        git clone https://github.com/google/googletest.git
+        cd googletest && mkdir build && cd build
+        cmake .. && make
+        sudo make install
+
+    - name: Build
+      run: |
+        rm -rf build >> /dev/null
+        mkdir build
+        pushd build
+        cmake .. ${cmake_cmd}
+        make
+        popd
+
+    - name: Test
+      run: |
+        rm -rf build >> /dev/null
+        mkdir build
+        pushd build
+        cmake ..  -DBUILD_TEST=ON
+        make
+        popd
+        ./build/test/run_tests
