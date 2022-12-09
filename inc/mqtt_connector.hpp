@@ -1,22 +1,26 @@
 #pragma once
 
+#include "common.hpp"
 #include "event_bus.hpp"
 #include "mqtt_events.hpp"
+#include "option.hpp"
 #include "topic_manager.hpp"
 
 namespace mqtt_connector {
+using ResultType = Result<mqtt::token_ptr, common::MqttError>;
+using OptionType = Option<mqtt::token_ptr>;
 
 class Connector : mqtt::callback
 {
   public:
     Connector(const std::string& _service_name);
 
-    void connect();
-    void disconnect();
-    void reconnect();
+    ResultType connect() noexcept;
+    OptionType disconnect() noexcept;
+    ResultType reconnect() noexcept;
 
-    void publish(const std::string& topic, const std::string& message);
-    void subscribe(const std::string& topic);
+    ResultType publish(const std::string& topic, const std::string& message);
+    ResultType subscribe(const std::string& topic);
 
   private:
     virtual void connected(const std::string& cause) override;
@@ -26,7 +30,7 @@ class Connector : mqtt::callback
 
   private:
     std::string service_name;
-    std::unique_ptr<mqtt::client> client_ptr;
+    std::unique_ptr<mqtt::async_client> client_ptr;
     mqtt::connect_options conn_opts;
 };
 
