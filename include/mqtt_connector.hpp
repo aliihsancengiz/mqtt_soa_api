@@ -29,7 +29,7 @@ class Connector : mqtt::callback
     virtual void delivery_complete(mqtt::delivery_token_ptr tok) override;
 
   private:
-    std::string service_name;
+    std::string service_name, session_name;
     std::unique_ptr<mqtt::async_client> client_ptr;
     mqtt::connect_options conn_opts;
 };
