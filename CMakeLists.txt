@@ -28,6 +28,7 @@ set(TARGET_INC
     include/result.hpp
     include/topic_manager.hpp
     include/sync_service.hpp
+    include/message.hpp
 )
 
 set(MODELS_CMAKE_FILES
@@ -44,6 +45,8 @@ foreach ( file ${TARGET_INC} )
     get_filename_component( dir ${file} DIRECTORY )
     install( FILES ${file} DESTINATION "${CMAKE_INSTALL_PREFIX}/${dir}/mqttsoa")
 endforeach()
+
+install(FILES include/nlohman/json.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/${dir}/mqttsoa/nlohman")
 
 install(TARGETS ${TARGET_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

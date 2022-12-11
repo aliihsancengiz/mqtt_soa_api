@@ -13,7 +13,7 @@ using OptionType = Option<mqtt::token_ptr>;
 class Connector : mqtt::callback
 {
   public:
-    Connector(const std::string& _service_name);
+    Connector(const std::string& _service_name, const std::string _session_name);
 
     ResultType connect() noexcept;
     OptionType disconnect() noexcept;
