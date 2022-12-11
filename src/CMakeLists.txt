@@ -1,26 +1,21 @@
-set(TARGET_NAME "mqtt-ipc-service")
+set(TARGET_NAME "mqttsoa")
 
-set(TARGET_SOURCES 
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/topic_manager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/mqtt_connector.cpp
-)
+file(GLOB TARGET_SOURCES CONFIGURE_DEPENDS *.cpp )
 
-add_executable(${TARGET_NAME} ${TARGET_SOURCES})
+add_library(${TARGET_NAME} SHARED ${TARGET_SOURCES})
 
 target_include_directories(${TARGET_NAME}
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/inc
-		${PROJECT_SOURCE_DIR}/event-bus
+        ${PROJECT_SOURCE_DIR}/include
     PRIVATE
         ""
 )
 
 target_link_libraries(${TARGET_NAME}
     PUBLIC
-		paho-mqttpp3
-		PahoMqttC::PahoMqttC
+        paho-mqttpp3
+        PahoMqttC::PahoMqttC
     PRIVATE
-        ""
 )
+
 

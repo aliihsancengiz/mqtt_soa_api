@@ -2,9 +2,27 @@
 
 namespace mqtt_connector {
 
+static std::string random_string()
+{
+    srand(time(NULL));  // seed with time
+
+    auto randchar = []() -> char {
+        const char charset[] = "0123456789"
+                               "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                               "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[rand() % max_index];
+    };
+    int length = rand() % 25;
+    std::string str(length, 0);
+    std::generate_n(str.begin(), length, randchar);
+    return str;
+}
+
 Connector::Connector(const std::string& _service_name) : service_name(_service_name)
 {
-    client_ptr = std::make_unique<mqtt::async_client>("localhost", service_name, nullptr);
+    session_name = service_name + random_string();
+    client_ptr = std::make_unique<mqtt::async_client>("localhost", session_name, nullptr);
     client_ptr->set_callback(*this);
     conn_opts.set_clean_session(true);
 }
@@ -13,7 +31,7 @@ ResultType Connector::connect() noexcept
 {
     ResultType ret;
     if (!client_ptr) {
-        client_ptr = std::make_unique<mqtt::async_client>("localhost", service_name, nullptr);
+        client_ptr = std::make_unique<mqtt::async_client>("localhost", session_name, nullptr);
     }
     try {
         ret.set_value(client_ptr->connect(conn_opts));
@@ -42,7 +60,7 @@ ResultType Connector::reconnect() noexcept
 {
     ResultType ret;
     if (!client_ptr) {
-        client_ptr = std::make_unique<mqtt::async_client>("localhost", service_name, nullptr);
+        client_ptr = std::make_unique<mqtt::async_client>("localhost", session_name, nullptr);
     }
     try {
         ret.set_value(client_ptr->reconnect());
