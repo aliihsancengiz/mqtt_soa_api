@@ -1,4 +1,4 @@
-#include "mqttsoa/sync_service.hpp"
+#include "sync_service.hpp"
 
 #include <csignal>
 
@@ -13,13 +13,12 @@ int main(int argc, char* argv[])
     signal(SIGINT, signalHandler);
     sync::Client cli("sample", "sub");
 
-    while (is_running)
-    {
+    while (is_running) {
         cli.send("Request { Favirote language? }");
-        Option<std::string> res;
-        res = cli.receive();
+        auto res = cli.receive();
         if (res.is_some()) {
-            std::cout << res.unwrap() << std::endl;
+            std::cout << res.unwrap().message_id << "---" << res.unwrap().client_id << " ---- "
+                      << res.unwrap().message << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }

@@ -1,4 +1,4 @@
-#include "mqttsoa/sync_service.hpp"
+#include "sync_service.hpp"
 
 #include <csignal>
 
@@ -8,20 +8,17 @@ void signalHandler(int signum)
     is_running.store(false);
 }
 
-using SS =sync::Service<common::Role::Server>;
-
 int main(int argc, char* argv[])
 {
-    SS server("sample", "sub");
+    sync::Server server("sample", "sub");
     signal(SIGINT, signalHandler);
 
-    Option<std::string> res;
-
     while (is_running) {
-        res = server.receive();
+        auto res = server.receive();
         if (res.is_some()) {
-            std::cout << res.unwrap() << std::endl;
-            server.send("Server Respose to " + res.unwrap() + " : Rust.");
+            std::cout << res.unwrap().message_id << "---" << res.unwrap().client_id << " ---- "
+                      << res.unwrap().message << std::endl;
+            server.respond(res.unwrap(), "Server Respose to " + res.unwrap().message + " : Rust.");
         }
     }
 

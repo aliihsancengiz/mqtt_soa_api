@@ -11,7 +11,7 @@ find_package(mqttsoa)
 
 target_include_directories(${SERVER_TARGET}
     PUBLIC
-        ${mqttsoa_INCLUDE_DIRS}
+        ${CMAKE_SOURCE_DIR}/include
     PRIVATE
         ""
 )
