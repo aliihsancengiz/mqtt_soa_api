@@ -26,7 +26,7 @@ static size_t get_id()
     return _id++;
 }
 
-namespace sync {
+namespace service {
 
 template<common::Role role>
 struct Service
@@ -37,6 +37,8 @@ struct Service
     mqtt_connector::ResultType respond(message_serdes::Message req, std::string message);
     mqtt_connector::ResultType send(std::string message);
     Option<message_serdes::Message> receive();
+    Option<message_serdes::Message>
+      consume(std::chrono::milliseconds timeout = std::chrono::milliseconds(1000));
 
   private:
     void on_connection_lost(std::string service_name, events::connection_lost_ev ev);
@@ -46,6 +48,8 @@ struct Service
     std::queue<message_serdes::Message> message_queue;
     const std::string _service_name, _session_name;
     std::unique_ptr<mqtt_connector::Connector> connector_ptr;
+    std::mutex queue_mutex;
+    std::condition_variable queue_cv;
 };
 
 template<common::Role role>
@@ -128,6 +132,24 @@ Option<message_serdes::Message> Service<role>::receive()
 }
 
 template<common::Role role>
+Option<message_serdes::Message> Service<role>::consume(std::chrono::milliseconds timeout)
+{
+    Option<message_serdes::Message> res;
+    std::unique_lock<std::mutex> _lock(queue_mutex);
+    queue_cv.wait_for(_lock, timeout, [this]() {
+        return message_queue.size();
+    });
+
+    if (message_queue.size()) {
+        message_serdes::Message msg = message_queue.front();
+        message_queue.pop();
+        res.set_some(msg);
+    }
+
+    return res;
+}
+
+template<common::Role role>
 void Service<role>::on_connection_lost(std::string service_name, events::connection_lost_ev ev)
 {
     if (service_name == this->_service_name) {
@@ -167,7 +189,7 @@ void Service<role>::on_message(std::string service_name, events::message_arrived
     }
 }
 
-using Server = sync::Service<common::Role::Server>;
-using Client = sync::Service<common::Role::Client>;
+using Server = service::Service<common::Role::Server>;
+using Client = service::Service<common::Role::Client>;
 
-}  // namespace sync
+}  // namespace service
