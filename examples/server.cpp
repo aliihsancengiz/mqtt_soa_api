@@ -1,4 +1,4 @@
-#include "sync_service.hpp"
+#include "service.hpp"
 
 #include <csignal>
 
@@ -10,7 +10,7 @@ void signalHandler(int signum)
 
 int main(int argc, char* argv[])
 {
-    sync::Server server("sample", "sub");
+    service::Server server("sample", "sub");
     signal(SIGINT, signalHandler);
 
     while (is_running) {

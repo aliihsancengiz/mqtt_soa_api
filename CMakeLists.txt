@@ -27,7 +27,7 @@ set(TARGET_INC
     include/option.hpp
     include/result.hpp
     include/topic_manager.hpp
-    include/sync_service.hpp
+    include/service.hpp
     include/message.hpp
 )
 
