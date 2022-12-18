@@ -34,6 +34,7 @@ struct Service
     Service(const std::string service_name, const std::string subservice_name);
     ~Service();
 
+  protected:
     mqtt_connector::ResultType respond(message_serdes::Message req, std::string message);
     mqtt_connector::ResultType send(std::string message);
     Option<message_serdes::Message> receive();
@@ -50,6 +51,43 @@ struct Service
     std::unique_ptr<mqtt_connector::Connector> connector_ptr;
     std::mutex queue_mutex;
     std::condition_variable queue_cv;
+};
+
+struct Server : protected Service<common::Role::Server>
+{
+    Server(const std::string service_name, const std::string subservice_name)
+        : Service<common::Role::Server>(service_name, subservice_name)
+    {
+    }
+    mqtt_connector::ResultType respond(message_serdes::Message req, std::string message)
+    {
+        return Service<common::Role::Server>::respond(req, message);
+    }
+    Option<message_serdes::Message> receive()
+    {
+        return Service<common::Role::Server>::receive();
+    }
+};
+
+struct Client : protected Service<common::Role::Client>
+{
+    Client(const std::string service_name, const std::string subservice_name)
+        : Service<common::Role::Client>(service_name, subservice_name)
+    {
+    }
+    mqtt_connector::ResultType send(std::string message)
+    {
+        return Service<common::Role::Client>::send(message);
+    }
+    Option<message_serdes::Message> receive()
+    {
+        return Service<common::Role::Client>::receive();
+    }
+    Option<message_serdes::Message>
+      consume(std::chrono::milliseconds timeout = std::chrono::milliseconds(1000))
+    {
+        return Service<common::Role::Client>::consume(timeout);
+    }
 };
 
 template<common::Role role>
@@ -189,7 +227,5 @@ void Service<role>::on_message(std::string service_name, events::message_arrived
     }
 }
 
-using Server = service::Service<common::Role::Server>;
-using Client = service::Service<common::Role::Client>;
 
 }  // namespace service

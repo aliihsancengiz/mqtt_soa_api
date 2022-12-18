@@ -10,8 +10,8 @@ void signalHandler(int signum)
 
 int main(int argc, char* argv[])
 {
-    service::Server server("sample", "sub");
     signal(SIGINT, signalHandler);
+    service::Server server("sample", "sub");
 
     while (is_running) {
         auto res = server.receive();
